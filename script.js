@@ -14,9 +14,9 @@ dialog.addEventListener('click', (event) => { if (event.target === dialog) { con
 dialog.addEventListener('close', () => previousFocus?.focus());
 const pages = {
   gear: ['The tools that we use.', '<p>Explore the cameras, lenses and accessories featured in our gear cage.</p><ul><li>Digital cameras and interchangeable lenses</li><li>Film cameras and instant photography</li><li>Lighting and on-location accessories</li></ul><p>This is a portfolio demonstration; no equipment shop is connected.</p>'],
-  style: ['Style guide', '<p>Poppins Regular. White and silver text on a black background. Uppercase labels use 2px letter spacing.</p><p>Desktop layout based on the original 1440px Figma frame.</p>'],
+  style: ['Style guide', '<p>Poppins Regular. White and silver text on a black background. Uppercase labels use 2px letter spacing.</p><p>Responsive layout based on the original 1440px Figma frame.</p>'],
   instructions: ['Instructions', '<p>Use the navigation to explore photography services, featured images and equipment. Press Escape to close dialogs.</p><p>Contact and newsletter forms are demonstrations: they do not transmit personal data.</p>'],
-  changelog: ['Changelog', '<p>Version 1.0 — desktop implementation in HTML, CSS and vanilla JavaScript, with original Figma assets, anchor navigation and accessible dialogs.</p>'],
+  changelog: ['Changelog', '<p>Version 1.1 — responsive implementation in HTML, CSS and vanilla JavaScript, with original Figma assets, anchor navigation and accessible dialogs.</p>'],
   licensing: ['Licensing', '<p>This page is an implementation of the supplied Aperture Figma design for a technical assignment. Images, logos and design belong to their respective owners. No commercial rights are claimed.</p><p>Poppins is distributed under the SIL Open Font License.</p>']
 };
 document.querySelectorAll('[data-service]').forEach(button => button.addEventListener('click', () => {
@@ -35,3 +35,30 @@ document.querySelector('#newsletter-form').addEventListener('submit', event => {
   document.querySelector('#newsletter-status').textContent = 'Demo only — no subscription created and no email stored.';
 });
 document.querySelectorAll('[data-social]').forEach(button => button.addEventListener('click', () => openDialog(button.dataset.social, '<p>No official social profile was supplied with this design.</p>')));
+
+// Mobile navigation: works with keyboard and resets when returning to desktop.
+const menuButton = document.querySelector('.menu-toggle');
+const navigation = document.querySelector('#main-navigation');
+const header = document.querySelector('.header');
+const mobileQuery = window.matchMedia('(max-width: 900px)');
+function closeMenu(restoreFocus = false) {
+  navigation.classList.remove('is-open');
+  menuButton.setAttribute('aria-expanded', 'false');
+  if (restoreFocus) menuButton.focus();
+}
+menuButton.hidden = false;
+header.classList.add('menu-ready');
+menuButton.addEventListener('click', () => {
+  const isOpen = navigation.classList.toggle('is-open');
+  menuButton.setAttribute('aria-expanded', String(isOpen));
+});
+navigation.addEventListener('click', event => {
+  if (event.target.closest('a') && mobileQuery.matches) closeMenu(true);
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && menuButton.getAttribute('aria-expanded') === 'true') closeMenu(true);
+});
+document.addEventListener('click', event => {
+  if (mobileQuery.matches && !header.contains(event.target)) closeMenu();
+});
+mobileQuery.addEventListener('change', () => closeMenu());
